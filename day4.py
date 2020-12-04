@@ -11,19 +11,7 @@ valid_data = open("day4_problem2_valid.txt", "r").readlines()
 
 class Passport:
 
-    required_fields = [
-        "byr",
-        "iyr",
-        "eyr",
-        "hgt",
-        "hcl",
-        "ecl",
-        "pid",
-    ]
-
-    optional_fields = ["cid"]
-
-    def __init__(self, lines) -> None:
+    def __init__(self, lines: List[str]) -> None:
 
         flattened_lines = [kvp for line in lines for kvp in line.split()]
         kvps = [(line.split(":")[0], line.split(":")[1]) for line in flattened_lines]
@@ -31,43 +19,43 @@ class Passport:
         self.fields: Dict[str, str] = dict(kvps)
         self.keys = self.fields.keys()
 
+        self.field_validations = {
+                "byr": self.byr,
+                "iyr": self.iyr,
+                "eyr": self.eyr,
+                "hgt": self.hgt,
+                "hcl": self.hcl,
+                "ecl": self.ecl,
+                "pid": self.pid
+            }
+
+        self.required_fields = self.field_validations.keys()
+
     def has_required_fields(self):
         return set(self.required_fields).issubset(set(self.fields.keys()))
 
     def byr(self):
-        if "byr" not in self.keys:
-            return False
-
-        y = self.fields["byr"]
-        if bool(re.search(r"^\d{4}$", y)):
-            return int(y) > 1919 and int(y) < 2003
+        year = self.fields["byr"]
+        if bool(re.search(r"^\d{4}$", year)):
+            return int(year) > 1919 and int(year) < 2003
         else:
             return False
 
     def iyr(self):
-        if "iyr" not in self.keys:
-            return False
-
-        y = self.fields["iyr"]
-        if bool(re.search(r"^\d{4}$", y)):
-            return int(y) > 2009 and int(y) < 2021
+        year = self.fields["iyr"]
+        if bool(re.search(r"^\d{4}$", year)):
+            return int(year) > 2009 and int(year) < 2021
         else:
             return False
 
     def eyr(self):
-        if "eyr" not in self.keys:
-            return False
-
-        y = self.fields["eyr"]
-        if bool(re.search(r"^\d{4}$", y)):
-            return int(y) > 2019 and int(y) < 2031
+        year = self.fields["eyr"]
+        if bool(re.search(r"^\d{4}$", year)):
+            return int(year) > 2019 and int(year) < 2031
         else:
             return False
 
     def hgt(self):
-        if "hgt" not in self.keys:
-            return False
-
         height = self.fields["hgt"]
         if "cm" in height:
             results = re.search(r"^(\d\d\d)cm$", height)
@@ -89,30 +77,18 @@ class Passport:
             return False
 
     def hcl(self):
-        if "hcl" not in self.keys:
-            return False
-
-        color = self.fields["hcl"]
-        return bool(re.search(r"^(#[0-9a-fA-F]{6})$", color))
+        return bool(re.search(r"^(#[0-9a-fA-F]{6})$", self.fields["hcl"]))
 
     def ecl(self):
-        if "ecl" not in self.keys:
-            return False
-
         return self.fields["ecl"] in "amb blu brn gry grn hzl oth".split()
 
     def pid(self):
-        if "pid" not in self.keys:
-            return False
-
         return bool(re.search(r"^([0-9]{9})$", self.fields["pid"]))
 
     def is_valid(self):
-        validation_methods = [getattr(self, x) for x in self.required_fields]
-        validations = [x() for x in validation_methods]
-
         if self.has_required_fields():
-            return all(validations)
+            results = [method() for (key, method) in self.field_validations.items() if key in self.keys]
+            return all(results)
         
         return False
 
