@@ -93,35 +93,34 @@ class Passport:
         return False
 
 
-def parse_data(data: List[str]) -> List[Passport]:
+def get_passports(data: List[str]) -> List[Passport]:
 
-    passport_data: List[List[str]] = []
+    passports: List[Passport] = []
 
-    current_passport: List[str] = []
+    passport_data: List[str] = []
 
     for count, line in enumerate(data, start=1):
 
-        if line.strip() == "":
-            passport_data.append(current_passport)
-            current_passport = []
-        elif count == len(data):
-            current_passport.append(line)
-            passport_data.append(current_passport)
-            current_passport = []
-        else:
-            current_passport.append(line)
+        blank_line = line.strip() == ""
 
-    return [Passport(x) for x in passport_data]
+        if not blank_line:
+            passport_data.append(line)
+
+        if blank_line or count == len(data):
+            passports.append(Passport(passport_data))
+            passport_data = []
+
+    return passports
 
 
 # Problem 1
 
 def problem_1_test():
-    passports = parse_data(test_data)
+    passports = get_passports(test_data)
     assert sum(p.has_required_fields() for p in passports) == 2
 
 def problem_1():
-    passports = parse_data(data)
+    passports = get_passports(data)
     return sum(p.has_required_fields() for p in passports)
 
 problem_1_test()
@@ -132,14 +131,14 @@ print(f"Problem 1 answer: {problem_1()}")
 # Problem 2
 
 def problem_2_test():
-    invalid_passports = parse_data(invalid_data)
+    invalid_passports = get_passports(invalid_data)
     assert sum(p.is_valid() for p in invalid_passports) == 0
 
-    valid_passports = parse_data(valid_data)
+    valid_passports = get_passports(valid_data)
     assert sum(p.is_valid() for p in valid_passports) == len(valid_passports)
 
 def problem_2():
-    passports = parse_data(data)
+    passports = get_passports(data)
     return sum(p.is_valid() for p in passports)
 
 problem_2_test()
