@@ -1,5 +1,6 @@
 from typing import Dict, List
 import re
+from helper import chunk_by_blank_lines
 
 # Setup
 
@@ -94,24 +95,7 @@ class Passport:
 
 
 def get_passports(data: List[str]) -> List[Passport]:
-
-    passports: List[Passport] = []
-
-    passport_data: List[str] = []
-
-    for count, line in enumerate(data, start=1):
-
-        blank_line = line.strip() == ""
-
-        if not blank_line:
-            passport_data.append(line)
-
-        if blank_line or count == len(data):
-            passports.append(Passport(passport_data))
-            passport_data = []
-
-    return passports
-
+    return [Passport(x) for x in chunk_by_blank_lines(data)]
 
 # Problem 1
 
