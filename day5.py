@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from typing import List
 from itertools import product
-# from collections import Counter
+from enum import Enum
 
 # Setup
 
 @dataclass()
 class Seat:
-    # seat_position: str
     row: int
     column: int
     id: int
@@ -21,26 +20,38 @@ test_data = {
 
 data = open("day5_data.txt", "r").readlines()
 
-def binary_search(seat_position:str, upper: str, lower: str, remaining_seats: List[int]) -> int:
-    if len(remaining_seats) > 1:
-        midpoint = len(remaining_seats) // 2
-        if seat_position[0] == upper:
-            return binary_search(seat_position[1:], upper, lower, remaining_seats[midpoint:])
-        else:
-            return binary_search(seat_position[1:], upper, lower, remaining_seats[:midpoint])
+class Partition(Enum):
+    upper = 1
+    lower = 2
 
-    return remaining_seats[0]
+def binary_search(partitions: List[Partition], seats: List[int]) -> int:
+    if len(seats) > 1:
+        mid = len(seats) // 2
+
+        next_partition, remaining_partitions = partitions[0], partitions[1:]
+
+        upper, lower = seats[mid:], seats[:mid]
+
+        if next_partition is Partition.upper:
+            return binary_search(remaining_partitions, upper)
+        else:
+            return binary_search(remaining_partitions, lower)
+
+    return seats[0]
+
+def as_partitions(s: str, upper: str) -> List[Partition]:
+    return [Partition.upper if char == upper else Partition.lower for char in list(s)]
 
 def parse_seat_position(seat_position: str) -> Seat:
 
-    row_partition = seat_position[:7]
-    column_partition = seat_position[7:]
+    row_partition = as_partitions(seat_position[:7], "B")
+    column_partition = as_partitions(seat_position[7:], "R")
 
     rows = list(range(128))
     columns = list(range(8))
 
-    row = binary_search(row_partition, "B", "F", rows)
-    column = binary_search(column_partition, "R", "L", columns)
+    row = binary_search(row_partition, rows)
+    column = binary_search(column_partition, columns)
     id = row * 8 + column
 
     return Seat(row, column, id)
@@ -68,31 +79,6 @@ problem_1_test()
 print(f"Problem 1 answer: {problem_1()}")
 
 # Problem 2
-
-
-# def problem_2_old():
-#     """
-#     First convoluted answer, using columns & rows instead of ids...
-#     """
-    
-#     filled_seats = [parse_seat_position(s) for s in data]
-
-#     rows = Counter(x.row for x in filled_seats)
-#     cols = Counter(x.column for x in filled_seats)
-
-#     row_median = median(rows.keys())
-#     col_median = median(cols.keys())
-
-#     most_common_row_count = rows.most_common(1)[0][1]
-#     most_common_col_count = cols.most_common(1)[0][1]
-
-#     rows_with_missing_seats = [row for row,count in rows.items() if count != most_common_row_count]
-#     cols_with_missing_seats = [col for col,count in cols.items() if count != most_common_col_count]
-
-#     missing_row = sorted([(row, abs(row - row_median)) for row in rows_with_missing_seats], key=lambda x: x[1])[0][0]
-#     missing_col = sorted([(col, abs(col - col_median)) for col in cols_with_missing_seats], key=lambda x: x[1])[0][0]
-
-#     return missing_row * 8 + missing_col
 
 def problem_2():
 
