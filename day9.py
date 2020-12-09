@@ -1,30 +1,39 @@
 # Setup
 
-from typing import Generator, List
+from typing import Generator, List, Tuple
 from itertools import product
 
 test_data = [int(i) for i in open("day9_test_data.txt", "r").readlines()]
 data = [int(i) for i in open("day9_data.txt", "r").readlines()]
 
+Chunk = List[int]
+NextNumber = int
+
+def create_chunks(nums: List[int], preamble_size: int) -> Generator[Tuple[Chunk, NextNumber], None, None]:
+    """
+    Returns a generator for getting a slice of the provided nums based on the preamble size paired with the next number.
+
+    Example item: ([35, 20, 15, 25, 47], 40)
+    """
+    return (
+        (nums[x: x + preamble_size], x + preamble_size)
+        for x in range(0, len(nums))
+        if (x + preamble_size) < len(nums)
+    )
+
+def contains_valid_pair(current_num: int, chunk: List[int]):
+    """
+    Checks whether there is a pair of numbers in the provided chunk that add up to the current_num.
+    """
+    return any((current_num - x) in chunk for x in chunk)
+
 def find_first_invalid_number(nums: List[int], preamble_size: int) -> int:
+    chunks = create_chunks(nums, preamble_size)
 
-    slice_start = 0
-    current_num_idx = preamble_size
+    invalid_numbers = [nums[num_idx] for chunk,num_idx in chunks 
+                                   if not contains_valid_pair(nums[num_idx], chunk)]
 
-    while current_num_idx < len(nums):
-        previous_x_nums = nums[slice_start:current_num_idx]
-
-        current_num = nums[current_num_idx]
-
-        diffs_in_previous_nums = [(current_num - x) in previous_x_nums for x in previous_x_nums]
-
-        if not any(diffs_in_previous_nums):
-            return current_num
-
-        slice_start += 1
-        current_num_idx += 1
-    
-    return 0
+    return invalid_numbers[0]
 
 # Problem 1
 
