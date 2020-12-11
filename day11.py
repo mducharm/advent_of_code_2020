@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import  List
+from typing import List
 from itertools import product
 
 test_data = [list(s.strip()) for s in open("day11_test_data.txt", "r").readlines()]
@@ -12,7 +12,10 @@ class SeatStatus(Enum):
 
 AllSeats = List[List[SeatStatus]]
 
-class Ferry():
+
+# Problem 1
+
+class FerryProblem1():
 
     def __init__(self, data: List[List[str]]) -> None:
 
@@ -27,14 +30,15 @@ class Ferry():
 
         self.seats = seats
         self.seat_change_count = 0
+        self.seat_limit = 4
 
-    def __update_seats(self) -> None:
+    def _update_seats(self) -> None:
         new_seats: AllSeats = []
 
         for row_idx, row in enumerate(self.seats):
             new_row = []
             for col_idx, seat in enumerate(row):
-                next_seat = self.__determine_next_seat_state(row_idx, col_idx, seat)
+                next_seat = self._determine_next_seat_state(row_idx, col_idx, seat)
                 new_row.append(next_seat)
 
             new_seats.append(new_row)
@@ -43,13 +47,12 @@ class Ferry():
         self.seat_change_count += 1
            
 
-    def __determine_next_seat_state(self, row_idx: int, col_idx: int, current_seat: SeatStatus) -> SeatStatus:
-
+    def _determine_next_seat_state(self, row_idx: int, col_idx: int, current_seat: SeatStatus) -> SeatStatus:
 
         if current_seat == SeatStatus.Floor:
             return SeatStatus.Floor
 
-        adjacent_seats = self.__get_adjacent_seats(row_idx, col_idx)
+        adjacent_seats = self._get_adjacent_seats(row_idx, col_idx)
 
         if current_seat == SeatStatus.Empty:
             if not any(seat == SeatStatus.Occupied for seat in adjacent_seats):
@@ -57,24 +60,23 @@ class Ferry():
 
         if current_seat == SeatStatus.Occupied:
             occupied_seats = adjacent_seats.count(SeatStatus.Occupied) 
-            if occupied_seats >= 4:
+            if occupied_seats >= self.seat_limit:
                 return SeatStatus.Empty
 
         return current_seat
 
-    def __get_adjacent_seats(self, row_idx: int, col_idx: int) -> List[SeatStatus]:
-    # def __get_adjacent_seats(self, row_idx: int, col_idx: int) -> Generator[SeatStatus, None, None]:
-
-        adjacent_seats = (self.seats[x][y]
+    def _get_adjacent_seats(self, row_idx: int, col_idx: int) -> List[SeatStatus]:
+        """
+        Returns the statuses of all adjacent seats.
+        """
+        return [self.seats[x][y]
             for x,y in product([row_idx - 1, row_idx, row_idx + 1], [col_idx - 1, col_idx, col_idx + 1]) 
             if (x, y) != (row_idx, col_idx) 
             and 0 <= x < len(self.seats)
             and 0 <= y < len(self.seats[x])
-        )
+        ]
 
-        return list(adjacent_seats)
-
-    def __get_occupied_seat_count(self) -> int:
+    def _get_occupied_seat_count(self) -> int:
         return sum(seat == SeatStatus.Occupied for row in self.seats for seat in row)
 
     def __str__(self) -> str:
@@ -86,24 +88,25 @@ class Ferry():
     def count_seats_once_stabilized(self) -> int:
         occupied_seat_count = []
 
-        current_seat_count = self.__get_occupied_seat_count()
+        current_seat_count = self._get_occupied_seat_count()
 
         while current_seat_count not in occupied_seat_count:
-            self.__update_seats()
+            self._update_seats()
             occupied_seat_count.append(current_seat_count)
-            current_seat_count = self.__get_occupied_seat_count()
+            current_seat_count = self._get_occupied_seat_count()
 
         return current_seat_count
+
 
 
 
 # Problem 1
 
 def problem_1_test():
-    assert Ferry(test_data).count_seats_once_stabilized() == 37
+    assert FerryProblem1(test_data).count_seats_once_stabilized() == 37
 
 def problem_1():
-    return Ferry(data).count_seats_once_stabilized()
+    return FerryProblem1(data).count_seats_once_stabilized()
 
 problem_1_test()
 
@@ -112,11 +115,56 @@ print(f"Problem 1 answer: {problem_1()}")
 
 # Problem 2
 
+class FerryProblem2(FerryProblem1):
+
+    def __init__(self, data: List[List[str]]) -> None:
+        super().__init__(data)
+
+        self.seat_limit = 5
+
+    def _get_adjacent_seats(self, row_idx: int, col_idx: int) -> List[SeatStatus]:
+        """
+        Returns the statuses of all seats that can be seen from the current seat.
+        """
+
+        adjacent_seats = []
+
+        possible_increments = product([-1, 1, 0], [-1, 1, 0])
+        
+        row_length = len(self.seats) - 1
+        col_length = len(self.seats[0]) - 1
+
+        for dx_dy in possible_increments:
+
+            if dx_dy == (0,0):
+                continue
+
+            x, y = row_idx, col_idx
+            dx, dy = dx_dy
+
+            x += dx
+            y += dy
+
+            while 0 <= x <= row_length and 0 <= y <= col_length:
+
+                next_seat = self.seats[x][y]
+
+                if next_seat != SeatStatus.Floor:
+                    adjacent_seats.append(next_seat)
+                    break
+
+                x += dx
+                y += dy
+
+        return adjacent_seats
+
+
+
 def problem_2_test():
-    pass
+    assert FerryProblem2(test_data).count_seats_once_stabilized() == 26
 
 def problem_2():
-    pass
+    return FerryProblem2(data).count_seats_once_stabilized()
 
 problem_2_test()
 
