@@ -18,7 +18,7 @@ class Direction(Enum):
     Right = "R"
     Left = "L"
 
-Directions = {
+DirectionDegrees = {
     "W": 0,
     "N": 90,
     "E": 180,
@@ -26,7 +26,7 @@ Directions = {
 }
 
 def direction_to_degrees(direction: Direction) -> int:
-    return Directions[direction.value]
+    return DirectionDegrees[direction.value]
 
 def calculate_increment(direction: Direction, amount: int) -> Tuple[int, int]:
     if direction == Direction.East:
@@ -42,7 +42,7 @@ def calculate_increment(direction: Direction, amount: int) -> Tuple[int, int]:
 
 def degrees_to_direction(degrees: int) -> Direction:
 
-    degrees_to_directions = dict([(int(value), key) for key,value in Directions.items()])
+    degrees_to_directions = dict([(int(value), key) for key,value in DirectionDegrees.items()])
 
     degrees %= 360
 
@@ -108,3 +108,65 @@ problem_1_test()
 
 print(f"Problem 1: {problem_1()}")
 
+# Problem 2
+
+Coordinates = Tuple[int, int]
+
+def update_ship_coords(ship_coords: Coordinates, waypoint: Coordinates, amount: int) -> Coordinates:
+    x, y = ship_coords
+    dx, dy = waypoint
+    return (x + dx * amount, y + dy * amount)
+
+def update_waypoint(ship_coords: Coordinates, waypoint: Coordinates, direction: Direction, amount: int) -> Coordinates:
+
+    x, y = waypoint
+
+    if direction == direction.North:
+        return (x, y + amount)
+    if direction == direction.South:
+        return (x, y - amount)
+    if direction == direction.East:
+        return (x + amount, y)
+    if direction == direction.West:
+        return (x - amount, y)
+    if direction == direction.Right:
+        for _ in range(0, amount, 90):
+            x, y = y, -x
+        return (x, y)
+    if direction == direction.Left:
+        for _ in range(0, amount, 90):
+            x, y = -y, x
+        return (x, y)
+
+    return waypoint
+
+def get_distance_with_waypoint(data: List[str], start_coords: Coordinates, starting_direction: Direction) -> int:
+
+    movements = parse_data_into_movements(data)
+
+    current_direction = starting_direction
+
+    ship_coords = start_coords
+    waypoint: Coordinates = (10, 1)
+
+    for (direction, amount) in movements:
+
+        if direction == Direction.Forward:
+            ship_coords = update_ship_coords(ship_coords, waypoint, amount)
+        else:
+            waypoint = update_waypoint(ship_coords, waypoint, direction, amount) 
+
+    x, y = ship_coords
+ 
+    return abs(x) + abs(y)
+
+
+def problem_2_test():
+    assert get_distance_with_waypoint(test_data, (0, 0), Direction.East) == 286
+
+def problem_2():
+    return get_distance_with_waypoint(data, (0, 0), Direction.East)
+
+problem_2_test()
+
+print(f"Problem 2: {problem_2()}")
