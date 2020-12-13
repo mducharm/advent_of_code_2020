@@ -144,8 +144,6 @@ def get_distance_with_waypoint(data: List[str], start_coords: Coordinates, start
 
     movements = parse_data_into_movements(data)
 
-    current_direction = starting_direction
-
     ship_coords = start_coords
     waypoint: Coordinates = (10, 1)
 
