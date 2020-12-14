@@ -28,8 +28,8 @@ def process_docking_data(data: List[str]) -> int:
         if next_value:
             mem, value = next_value.group("mem"), int(next_value.group("value"))
 
-            value |= int(mask.replace("X", "0"), base=2)
-            value &= int(mask.replace("X", "1"), base=2)
+            value |= int(mask.replace("X", "0"), base=2) # flip ones from mask
+            value &= int(mask.replace("X", "1"), base=2) # flip zeroes from mask
 
             total[mem] = value
 
@@ -48,3 +48,14 @@ def problem_1():
 problem_1_test()
 
 print(f"Problem 1 answer: {problem_1()}")
+
+def problem_2_test():
+    assert process_docking_data(test_data) == 165
+
+
+def problem_2():
+    return process_docking_data(data)
+
+problem_2_test()
+
+print(f"Problem 2 answer: {problem_2()}")
