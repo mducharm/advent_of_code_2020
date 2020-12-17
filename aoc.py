@@ -1,6 +1,7 @@
 import unittest
 import sys
 import importlib
+import webbrowser
 
 if __name__ == '__main__':
 
@@ -23,6 +24,11 @@ if __name__ == '__main__':
 
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_class)
         unittest.TextTestRunner(verbosity=2).run(suite)
+
+    if len(sys.argv) == 3 and sys.argv[2] == "open":
+
+        webbrowser.open_new_tab(f"https://adventofcode.com/2020/day/{day}")
+
 
 
 
