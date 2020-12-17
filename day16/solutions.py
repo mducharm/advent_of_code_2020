@@ -86,29 +86,39 @@ def get_ticket_scanning_error_rate(data: List[str]) -> int:
     return sum(invalid_nums)
 
 def get_rule_positions(data: List[str]) -> Tuple[Dict[str, int], TicketData]:
-    ticket_data = parse_ticket_data(data)
+    
+    ticket_data = filter_out_invalid_tickets(parse_ticket_data(data))
 
-    valid_tickets = filter_out_invalid_tickets(ticket_data)
+    ticket_columns = slice_tickets_into_columns(ticket_data)
 
-    ticket_columns = slice_tickets_into_columns(valid_tickets)
-
-    rule_positions: Dict[str, int] = {}
-    remaining_rules: Set[str] = set(ticket_data.rules.keys())
+    possible_rule_position: Dict[str, List[int]] = {}
 
     for key, rule_sets in ticket_data.rules.items():
 
         rule_nums: Set[int] = set().union(*rule_sets)
 
         for idx, column in enumerate(ticket_columns):
-            if set(column).issubset(rule_nums) and idx not in rule_positions.values():
-                rule_positions[key] = idx
-                remaining_rules.remove(key)
-                break
+            if set(column).issubset(rule_nums) and idx not in possible_rule_position.values():
 
-    # Check for duplicate positions
-    assert len(rule_positions.values()) == len(set(rule_positions.values()))
+                if key not in possible_rule_position.keys():
+                    possible_rule_position[key] = []
 
-    return rule_positions, ticket_data
+                possible_rule_position[key] = possible_rule_position[key] + [idx]
+
+    actual_positions: Dict[str, int] = {}
+    possible_positions = possible_rule_position.items()
+
+    while possible_positions:
+        key, position = min(possible_positions, key=lambda p: len(p[1]))
+
+        actual_positions[key] = position[0]
+
+        possible_positions = [
+            (k, [p for p in positions if p != position[0]]) 
+            for k, positions in possible_positions if k != key
+            ]
+
+    return actual_positions, ticket_data
 
 def get_product_of_departure_fields(data: List[str]) -> int:
     rule_positions, ticket_data = get_rule_positions(data) 

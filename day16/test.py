@@ -1,4 +1,4 @@
-from day16.solutions import get_product_of_departure_fields, get_rule_positions, get_ticket_scanning_error_rate
+from day16.solutions import get_rule_positions, get_ticket_scanning_error_rate
 from shared.helper import get_input
 import unittest
 
