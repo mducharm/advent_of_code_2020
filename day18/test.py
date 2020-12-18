@@ -1,4 +1,4 @@
-from day18.solutions import process_math_problem
+from day18.solutions import convert_to_RPN, convert_to_RPN_with_precedence, process_math_problem
 import unittest
 
 class Day_18_Tests(unittest.TestCase):
@@ -21,14 +21,17 @@ class Day_18_Tests(unittest.TestCase):
 
     def test_problem_1(self):
         for exp, expected_result in self.test_cases:
-            actual_result = process_math_problem(exp)
+            actual_result = process_math_problem(exp, convert_to_RPN)
 
             self.assertEqual(expected_result, actual_result)
             
 
 
     def test_problem_2(self):
-        pass
+        for exp, expected_result in self.test_cases_2:
+            actual_result = process_math_problem(exp, convert_to_RPN_with_precedence)
+
+            self.assertEqual(expected_result, actual_result)
 
 
 
