@@ -1,4 +1,4 @@
-from day17.solutions import cycle_cubes
+from day17.solutions import cycle_cubes, cycle_cubes_4D
 from shared.helper import get_input
 import unittest
 
@@ -13,7 +13,9 @@ class Day_17_Tests(unittest.TestCase):
         self.assertEqual(result, 112)
 
     def test_problem_2(self):
-        pass
+        result = cycle_cubes_4D(self.test_data, 6)
+
+        self.assertEqual(result, 848)
 
 
 if __name__ == '__main__':
