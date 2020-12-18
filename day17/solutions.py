@@ -17,7 +17,7 @@ def get_next_iteration(active_cubes: Set[Coordinates]) -> Set[Coordinates]:
         active_neighbors = neighbor_cubes.intersection(active_cubes)
 
         # Only add currently active cube to next list if it should be active.
-        if len(active_neighbors) - 1 in (2, 3):
+        if len(active_neighbors) in (2, 3):
             next_cubes.add(cube)
 
         inactive_neighbors = neighbor_cubes - active_cubes
@@ -27,7 +27,7 @@ def get_next_iteration(active_cubes: Set[Coordinates]) -> Set[Coordinates]:
 
             active_neighbors_neighbors = neighbors_neighbors.intersection(active_cubes)
 
-            if len(active_neighbors_neighbors) == 2:
+            if len(active_neighbors_neighbors) == 3:
                 next_cubes.add(n)
 
     return next_cubes
