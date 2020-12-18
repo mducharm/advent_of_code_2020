@@ -1,100 +1,69 @@
 from itertools import product
-from typing import Dict, Generator, List, Tuple
+import itertools
+from typing import List, Set, Tuple
 from shared.helper import get_input
-from enum import Enum
 
 data = get_input(__file__)
 
-class State(Enum):
-    Active = "#"
-    Inactive = "."
-
-Grid = (
-    Dict[int, 
-        Dict[int, 
-            Dict[int, State]
-            ]
-        ]
-    )
-    # To get a particular coordinate's state, do:
-    # grid[z][y][x] = State
-
 Coordinates = Tuple[int, int, int]
 
-Cube = Tuple[Coordinates, State]
+def get_next_iteration(active_cubes: Set[Coordinates]) -> Set[Coordinates]:
 
+    next_cubes = set()
 
-def get_next_iteration(initial_cubes: List[Cube]) -> List[Cube]:
+    for cube in active_cubes:
+        neighbor_cubes = get_neighbor_cubes(cube)
 
-    next_cubes = []
+        active_neighbors = neighbor_cubes.intersection(active_cubes)
 
-    cubes = []
+        # Only add currently active cube to next list if it should be active.
+        if len(active_neighbors) - 1 in (2, 3):
+            next_cubes.add(cube)
 
-    # Need to check the neighbors of all existing cells as well, 
-    # since there cells not in the initial list that 
-    for cube in initial_cubes:
-        neighbor_cubes = get_neighbor_cubes(cube, cubes)
-        for c in neighbor_cubes:
-            cubes.append(c)
+        inactive_neighbors = neighbor_cubes - active_cubes
 
-        cubes.append(cube)
+        for n in inactive_neighbors:
+            neighbors_neighbors = get_neighbor_cubes(n)
 
+            active_neighbors_neighbors = neighbors_neighbors.intersection(active_cubes)
 
-    for cube in cubes:
-        # Get neighbors
-        neighbor_cubes = get_neighbor_cubes(cube, cubes)
-
-        num_of_active_neighbors = sum(state == State.Active for _, state in neighbor_cubes)
-
-        coords, state = cube
-
-        # Determine next state:
-        if num_of_active_neighbors == 3:
-            next_cubes.append((coords, State.Active))
-        elif num_of_active_neighbors == 2 and state == State.Active:
-            next_cubes.append((coords, State.Active))
-        else:
-            next_cubes.append((coords, State.Inactive))
+            if len(active_neighbors_neighbors) == 2:
+                next_cubes.add(n)
 
     return next_cubes
 
 
-def get_initial_layer(data: List[str]) -> List[Cube]:
-    return [
-            ((x, y, 0), State(state))
+def get_initial_layer(data: List[str]) -> Set[Coordinates]:
+    return {
+            (x, y, 0) 
             for y, column in enumerate(data)
-            for x, state in enumerate(column.strip())
-        ]
+            for x, s in enumerate(column.strip())
+            if s == "#"
+        }
 
+def get_neighbor_cubes(coord: Coordinates) -> Set[Coordinates]:
 
-def get_neighbor_cubes(cube: Cube, all_cubes: List[Cube]) -> List[Cube]:
-
-    coords, _ = cube
-    x, y, z = coords
+    x, y, z = coord
 
     possible_differences = (t for t in product([-1, 0, 1], repeat=3) if t != (0, 0, 0))
 
-    neighbor_coordinates = ((x + dx, y + dy, z + dz) for dx, dy, dz in possible_differences)
+    neighbor_coordinates = {
+        (x + dx, y + dy, z + dz) 
+        for dx, dy, dz in possible_differences
+        }
 
-    neighbor_cubes = []
-
-    for coord in neighbor_coordinates:
-
-        if (coord, State.Active) in all_cubes:
-            neighbor_cubes.append((coord, State.Active))
-        else:
-            neighbor_cubes.append((coord, State.Inactive))
-
-    return neighbor_cubes
+    return neighbor_coordinates
 
 
-def cycle_cubes(data: List[str], num: int) -> int:
-    cubes = get_initial_layer(data)
+def cycle_cubes(data: List[str], num_of_cycles: int) -> int:
 
-    for _ in range(num):
-        cubes = get_next_iteration(cubes)
+    coords = get_initial_layer(data)
 
-    return sum(state == State.Active for _, state in cubes)
+    for _ in itertools.repeat(None, num_of_cycles):
+
+        coords = get_next_iteration(coords)
+
+    return len(coords)
 
 def problem_1():
     return cycle_cubes(data, 6)

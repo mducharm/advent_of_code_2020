@@ -8,11 +8,6 @@ class Day_17_Tests(unittest.TestCase):
         self.test_data = get_input(__file__, "input_test")
 
     def test_problem_1(self):
-        # cubes = ConwayCubes(self.test_data)
-
-        # cubes.run_boot_process(6)
-
-        # active_cubes = cubes.get_num_of_active_cubes()
         result = cycle_cubes(self.test_data, 6)
 
         self.assertEqual(result, 112)
