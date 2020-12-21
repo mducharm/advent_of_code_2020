@@ -4,6 +4,9 @@ You can find this year's problems [here](https://adventofcode.com/2020).
 
 
 ```bash
+# Opens a new tab with the given day in browser
+python .\aoc.py 2 open
+
 # Run a specific day
 python .\aoc.py 2 
 
