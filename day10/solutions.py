@@ -4,9 +4,6 @@ from typing import Dict, List
 from shared.helper import get_input
 import math
 
-# test_data_1 = [int(i) for i in open("day10_test_data1.txt", "r").readlines()]
-# test_data_2 = [int(i) for i in open("day10_test_data2.txt", "r").readlines()]
-# data = [int(i) for i in open("day10_data.txt", "r").readlines()]
 data = [int(i) for i in get_input(__file__)]
 
 
@@ -62,4 +59,3 @@ def get_all_possible_arrangements(data: List[int]) -> int:
 
 def problem_2():
     return get_all_possible_arrangements(data) 
-    
